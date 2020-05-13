@@ -37,12 +37,15 @@
                                         "elisp-demos.org"
                                         elisp-demos--load-dir))
 
+(defvar elisp-demos--heading-regexp "^\\* *%s$")
+(defvar elisp-demos--heading-capture-regexp "^\\* *\\(.+\\)$")
+
 (defun elisp-demos--search (symbol)
   (with-temp-buffer
     (insert-file-contents elisp-demos--elisp-demos.org)
     (goto-char (point-min))
     (when (re-search-forward
-           (format "^\\* %s$" (regexp-quote (symbol-name symbol)))
+           (format elisp-demos--heading-regexp (regexp-quote (symbol-name symbol)))
            nil t)
       (let (beg end)
         (forward-line 1)
@@ -67,7 +70,7 @@
     (insert-file-contents elisp-demos--elisp-demos.org)
     (goto-char (point-min))
     (let (symbols)
-      (while (re-search-forward "^\\* \\(.+\\)$" nil t)
+      (while (re-search-forward elisp-demos--heading-capture-regexp nil t)
         (push (intern (match-string-no-properties 1)) symbols))
       (nreverse symbols))))
 
@@ -92,7 +95,7 @@
   (find-file elisp-demos--elisp-demos.org)
   (goto-char (point-min))
   (and (re-search-forward
-        (format "^\\* %s$" (regexp-quote (symbol-name symbol))))
+        (format elisp-demos--heading-regexp (regexp-quote (symbol-name symbol))))
        (goto-char (line-beginning-position))
        (org-show-entry))
   t)
@@ -130,7 +133,7 @@
   (goto-char (point-min))
   (or
    (catch 'found
-     (while (re-search-forward "^\\* \\(.+\\)$" nil t)
+     (while (re-search-forward elisp-demos--heading-capture-regexp nil t)
        (cond ((string= (match-string-no-properties 1) (symbol-name symbol))
               (goto-char (line-beginning-position))
               (user-error "%s already exists" symbol))
@@ -220,7 +223,7 @@
     (goto-char (point-min))
     (let ((output-buffer (generate-new-buffer " *elisp-demos-json*"))
           title body beg end)
-      (while (re-search-forward "^\\* \\(.+\\)$" nil t)
+      (while (re-search-forward elisp-demos--heading-capture-regexp nil t)
         (setq title (match-string-no-properties 1))
         (setq beg (save-excursion
                     (forward-line 1)
